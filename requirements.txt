@@ -6,3 +6,4 @@ celery==5.4.0
 django-celery-beat==2.7.0
 channels==3.0.0
 channels-redis==4.2.0
+environ==1.0

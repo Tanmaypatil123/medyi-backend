@@ -9,12 +9,16 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
+DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -22,8 +26,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-c*uf@#_jzeiwx^5$$(b2)14hk(u*n4pat)8i@+qqbd9bz87=zd"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -38,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
     "api"
 ]
 
@@ -87,9 +90,15 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": env("DEFAULT_DATABASE_NAME", default="medyi_db"),
+            "USER": env("DEFAULT_DATABASE_USER", default=""),
+            "PASSWORD": env("DEFAULT_DATABASE_PASSWORD", default=""),
+            "HOST": env("DEFAULT_DATABASE_HOST", default="localhost"),
+            "PORT": env("DEFAULT_DATABASE_PORT", default="5432"),
+            "CONN_MAX_AGE": env.int("DATABASE_CONN_MAX_AGE", default=None),
+            "DISABLE_SERVER_SIDE_CURSORS": env("DISABLE_SERVER_SIDE_CURSORS", default=True),
+        },
 }
 
 
@@ -128,8 +137,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CELERY_TIMEZONE = "Asia/Kolkata"
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="amqp://localhost")
+
