@@ -1,6 +1,7 @@
 from django.shortcuts import render
 
 from api.authications.TokenGenerator import TokenGenerator
+from api.authications.api_authentication import MyAuthentication
 from api.services import login_or_register_user, get_data_and_create_user_chat_model, generate_access_token_service
 from api.utils.base_view import BaseAPIView
 from api.utils.response import status_200
@@ -20,6 +21,8 @@ class RegisterUser(BaseAPIView):
 
 
 class GetDataAndCreateUserChatModel(BaseAPIView):
+    authentication_classes = (MyAuthentication,)
+
     def post(self, request):
         data = get_data_and_create_user_chat_model(data=request.data)
         return status_200(message="Created Chat Model", data=data)
