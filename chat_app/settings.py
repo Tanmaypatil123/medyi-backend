@@ -11,14 +11,13 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
-import environ
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-DEBUG = env.bool("DJANGO_DEBUG", default=False)
+
+DEBUG = True
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -90,16 +89,11 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
-            "NAME": env("DEFAULT_DATABASE_NAME", default="medyi_db"),
-            "USER": env("DEFAULT_DATABASE_USER", default=""),
-            "PASSWORD": env("DEFAULT_DATABASE_PASSWORD", default=""),
-            "HOST": env("DEFAULT_DATABASE_HOST", default="localhost"),
-            "PORT": env("DEFAULT_DATABASE_PORT", default="5432"),
-            "CONN_MAX_AGE": env.int("DATABASE_CONN_MAX_AGE", default=None),
-            "DISABLE_SERVER_SIDE_CURSORS": env("DISABLE_SERVER_SIDE_CURSORS", default=True),
-        },
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
 }
+
 
 
 # Password validation
@@ -145,5 +139,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CELERY_TIMEZONE = "Asia/Kolkata"
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="amqp://localhost")
+CELERY_BROKER_URL = "amqp://localhost"
 
