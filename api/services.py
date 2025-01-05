@@ -35,7 +35,7 @@ def get_data_and_create_user_chat_model(*, data: Dict, user_id: int) -> Dict:
     ai_character = create_user_ai_character(user_id=user_id, data=data)
     print(f"======== {ai_character=}")
     # Use delay() instead of apply_async for simpler calls
-    create_ai_model_for_user_and_assign(user_id=user_id, ai_character_id=ai_character.id)
+    return create_ai_model_for_user_and_assign(user_id=user_id, ai_character_id=ai_character.id)
 
 
 def create_ai_model_for_user_and_assign(user_id: int, ai_character_id: int):
