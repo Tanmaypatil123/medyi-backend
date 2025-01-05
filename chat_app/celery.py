@@ -4,13 +4,12 @@ import os
 # Third Party Stuff
 import environ
 from celery import Celery
-from celery.schedules import crontab
-from kombu import Exchange, Queue
+ 
 
 env = environ.Env()
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chat_app.settings.base')
-app = Celery("vibe_core")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chat_app.settings')
+app = Celery("chat_app")
 
 if "CELERY_RESULT_BACKEND" in env:
     app.conf.result_backend = env("CELERY_RESULT_BACKEND")

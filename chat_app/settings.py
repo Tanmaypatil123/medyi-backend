@@ -20,6 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
+
 DEBUG = env.bool("DJANGO_DEBUG", default=True)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -27,9 +28,7 @@ DEBUG = env.bool("DJANGO_DEBUG", default=True)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-c*uf@#_jzeiwx^5$$(b2)14hk(u*n4pat)8i@+qqbd9bz87=zd"
 
-
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -75,8 +74,6 @@ TEMPLATES = [
 
 ASGI_APPLICATION = "chat_app.asgi.application"
 
-
-
 CHANNEL_REDIS_HOST = env("CHANNEL_REDIS_HOST", default="localhost")
 CHANNEL_LAYERS = {
     "default": {
@@ -95,13 +92,11 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR + "/db.sqlite3",
     },
-    "write":{
+    "write": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR + "/db.sqlite3",
     },
 }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -121,7 +116,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -132,7 +126,6 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -147,7 +140,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CELERY_TIMEZONE = "Asia/Kolkata"
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="amqp://localhost")
-
 
 CACHE_NAMES = {
     "OAUTH_TOKEN_CACHE": {
