@@ -194,6 +194,7 @@ class FriendDetails(models.Model):
     def __str__(self):
         return self.name
 
+
 class BaseAppModel(models.Model):
     """An abstract base class model that provides self-updating
     ``created`` and ``modified`` fields with id as primary_key field.
@@ -210,28 +211,31 @@ class BaseAppModel(models.Model):
 class CustomUser(BaseAppModel):
     name = models.CharField(max_length=20)
     email = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=True,null=True)
-    is_deleted = models.BooleanField(default=False,null=True)
-    age = models.CharField(max_length=5,null=True)
-    gender = models.CharField(max_length=2,default=1)
+    is_active = models.BooleanField(default=True, null=True)
+    is_deleted = models.BooleanField(default=False, null=True)
+    age = models.CharField(max_length=5, null=True)
+    gender = models.CharField(max_length=2, default=1)
 
 
 class UserAiCharacter(BaseAppModel):
-    user = models.ForeignKey(to=CustomUser,on_delete=models.CASCADE,related_name="user_ai")
+    user = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE, related_name="user_ai")
     properties = models.JSONField(default=dict)
 
 
 class MessageType(Enum):
     VOICE = 'VOICE'
+    IMAGE = 'IMAGE'
+    TEXT = 'TEXT'
 
 
 class MessageReadReciept(Enum):
     read = "read"
     sent = "sent"
 
+
 class Room(BaseAppModel):
     initiator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='chat_initiator')
-    initiatee = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='chat_initiatee')
+    initiatee = models.ForeignKey(UserAiCharacter, on_delete=models.CASCADE, related_name='chat_initiatee')
     last_message_at = models.DateTimeField(null=True)
     last_message = models.ForeignKey("Message", on_delete=models.CASCADE, null=True, related_name='messages')
     is_active = models.BooleanField(default=True, null=True)
@@ -241,11 +245,11 @@ class Room(BaseAppModel):
 class Message(BaseAppModel):
     chat = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='messages_sent')
-    message_type = models.CharField(max_length=10,choices=[(tag.name, tag.value) for tag in MessageType],
-            default=MessageType.VOICE.value,)
+    message_type = models.CharField(max_length=10, choices=[(tag.name, tag.value) for tag in MessageType],
+                                    default=MessageType.VOICE.value, )
     content = models.TextField(default=None, null=True)
     read_reciept = models.CharField(max_length=15,
-            choices=[(tag.name, tag.value) for tag in MessageReadReciept],
-            default=MessageReadReciept.sent.value,
-        )
+                                    choices=[(tag.name, tag.value) for tag in MessageReadReciept],
+                                    default=MessageReadReciept.sent.value,
+                                    )
     is_active = models.BooleanField(default=True, null=True)

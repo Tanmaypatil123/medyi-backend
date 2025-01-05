@@ -1,3 +1,5 @@
+from enum import Enum
+
 AUTHENTICATION_HEADER = "HTTP_AUTHORIZATION"
 APPVERSION_HEADER = "HTTP_APPVERSION"
 
@@ -21,3 +23,17 @@ IMAGE_QUALITY_WEIGHTS = {
     'noise_level': 2,
     'entropy': 2
 }
+
+
+class ChatEvents(Enum):
+    send_message_error = "send_message_error"
+    on_read_receipt = "on_read_receipt"
+    send_read_receipt = "send_read_receipt"
+    new_message = "new_message"
+    new_room = "new_room"
+    updated_profile = 'updated_profile'
+    profile_update_failed = "profile_update_failed"
+    askout_received = "askout_received"
+    update_chatlist = "update_chatlist"
+    chatlist_on_read_receipt = "chatlist_on_read_receipt"
+    updated_profile_images = "updated_profile_images"
