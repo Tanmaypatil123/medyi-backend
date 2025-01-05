@@ -15,6 +15,7 @@ class MyAuthentication(BaseAuthentication):
         return "Failed"
 
     def check_auth_token(self, auth_token):
+        print(auth_token)
         if auth_token is None:
             raise AUTH_ERROR
         user = CustomUser.objects.filter(auth_token=auth_token).first()
@@ -39,10 +40,11 @@ class MyAuthentication(BaseAuthentication):
 
     def authenticate(self, request):
         auth_token = request.META.get(AUTHENTICATION_HEADER, None)
+        print(auth_token)
         app_version = int(request.META.get(APPVERSION_HEADER, 0))
         if not auth_token:
             raise exceptions.NotAuthenticated("Invalid Request")
-
+        print("OAuth" in auth_token)
         if "OAuth" in auth_token:
             try:
                 access_token = auth_token.split(" ")[1]

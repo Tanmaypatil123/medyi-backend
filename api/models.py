@@ -216,6 +216,7 @@ class CustomUser(BaseAppModel):
     age = models.CharField(max_length=5, null=True)
     gender = models.CharField(max_length=2, default=1)
     is_verified = models.BooleanField(default=False,null=True)
+    is_blocked = models.BooleanField(default=False,null=True)
 
 
 class UserAiCharacter(BaseAppModel):

@@ -10,15 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
-from pathlib import Path
+import environ
+import logging
 
+logger = logging.getLogger(__name__)
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-DEBUG = True
-
+DEBUG = env.bool("DJANGO_DEBUG", default=True)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -75,11 +77,12 @@ ASGI_APPLICATION = "chat_app.asgi.application"
 
 
 
+CHANNEL_REDIS_HOST = env("CHANNEL_REDIS_HOST", default="localhost")
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("localhost", 6379)],
+            "hosts": [(CHANNEL_REDIS_HOST, 6379)],
         },
     },
 }
@@ -90,8 +93,12 @@ CHANNEL_LAYERS = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+        "NAME": BASE_DIR + "/db.sqlite3",
+    },
+    "write":{
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR + "/db.sqlite3",
+    },
 }
 
 
@@ -139,5 +146,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CELERY_TIMEZONE = "Asia/Kolkata"
-CELERY_BROKER_URL = "amqp://localhost"
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="amqp://localhost")
 
+
+CACHE_NAMES = {
+    "OAUTH_TOKEN_CACHE": {
+        "key": "OAuth_{token}",  # "oauth_token_{token}",
+        "timeout": 2 * 24 * 60 * 60,
+    },
+}

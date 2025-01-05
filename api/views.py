@@ -4,7 +4,7 @@ from api.authications.TokenGenerator import TokenGenerator
 from api.authications.api_authentication import MyAuthentication
 from api.services import login_or_register_user, get_data_and_create_user_chat_model, generate_access_token_service
 from api.utils.base_view import BaseAPIView
-from api.utils.response import status_200
+from api.utils.response import status_200, handle_post_exception
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 
 class RegisterUser(BaseAPIView):
+
+    @handle_post_exception
     def post(self, request):
         email = request.data.get("email", None)
 
@@ -23,8 +25,10 @@ class RegisterUser(BaseAPIView):
 class GetDataAndCreateUserChatModel(BaseAPIView):
     authentication_classes = (MyAuthentication,)
 
+    @handle_post_exception
     def post(self, request):
-        data = get_data_and_create_user_chat_model(data=request.data)
+        user_id = request.user.id
+        data = get_data_and_create_user_chat_model(user_id=user_id,data=request.data)
         return status_200(message="Created Chat Model", data=data)
 
 
