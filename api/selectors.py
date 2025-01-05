@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Dict
+from typing import Dict, Optional
 
 from api.authications.TokenGenerator import TokenGenerator
 from api.models import CustomUser, UserAiCharacter, Room, Message, RefreshTokenModel
@@ -19,7 +19,7 @@ def get_or_create_group(*, user_id, ai_character_id: int):
     return Room.objects.create(initiator_id=user_id, initiatee_id=ai_character_id)
 
 
-def save_chat_message(room_id: int, sender_id: int, message_type: str, message_content: str, ):
+def save_chat_message(room_id: int, sender_id: Optional[int], message_type: str, message_content: str, ):
     return Message.objects.create(
         chat_id=room_id,
         sender_id=sender_id,
