@@ -11,6 +11,7 @@ def get_or_create_user(*, email: str):
 
 
 def create_user_ai_character(*, user_id: int, data: Dict):
+    print(data)
     return UserAiCharacter.objects.create(user_id=user_id, properties=data)
 
 
