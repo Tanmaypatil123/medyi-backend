@@ -215,6 +215,7 @@ class CustomUser(BaseAppModel):
     is_deleted = models.BooleanField(default=False, null=True)
     age = models.CharField(max_length=5, null=True)
     gender = models.CharField(max_length=2, default=1)
+    is_verified = models.BooleanField(default=False,null=True)
 
 
 class UserAiCharacter(BaseAppModel):
@@ -253,3 +254,10 @@ class Message(BaseAppModel):
                                     default=MessageReadReciept.sent.value,
                                     )
     is_active = models.BooleanField(default=True, null=True)
+
+
+class RefreshTokenModel(BaseAppModel):
+    refresh_token = models.TextField(max_length=15, unique=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    device_id = models.CharField(max_length=50, null=True)
+    expire_in = models.DateTimeField(null=True)
