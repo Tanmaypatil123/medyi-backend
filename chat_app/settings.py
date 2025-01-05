@@ -139,7 +139,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CELERY_TIMEZONE = "Asia/Kolkata"
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="amqp://localhost")
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/0")
 
 CACHE_NAMES = {
     "OAUTH_TOKEN_CACHE": {

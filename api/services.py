@@ -1,12 +1,18 @@
 from typing import Dict, Tuple, Optional
 
 from api.authications.TokenGenerator import TokenGenerator
-from api.models import RefreshTokenModel
-from api.selectors import get_or_create_user, create_user_ai_character, create_refresh_token
-from api.tasks import create_ai_model_for_user_and_assign
+from api.consumers.chat_consumer import BASE_USER_GROUP
+from api.models import RefreshTokenModel, MessageType
+from api.selectors import get_or_create_user, create_user_ai_character, create_refresh_token, get_or_create_group, \
+    save_chat_message
 from django.conf import settings
 from django.core.cache import cache
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 import logging
+
+from api.utils.constants import ChatEvents
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +33,39 @@ def login_or_register_user(*, email: str) -> Dict:
 
 def get_data_and_create_user_chat_model(*, data: Dict, user_id: int) -> Dict:
     ai_character = create_user_ai_character(user_id=user_id, data=data)
-    create_ai_model_for_user_and_assign.delay(user_id=user_id, ai_character_id=ai_character.id)
+    print(f"======== {ai_character=}")
+    # Use delay() instead of apply_async for simpler calls
+    create_ai_model_for_user_and_assign(user_id=user_id, ai_character_id=ai_character.id)
+
+
+def create_ai_model_for_user_and_assign(user_id: int, ai_character_id: int):
+    room = get_or_create_group(user_id=user_id, ai_character_id=ai_character_id)
+    print(f"[DEBUG] :: here.... {room.id} {ai_character_id=}")
+    # generate ai model content
+    content = "somerhing"
+    message = save_chat_message(
+        room_id=room.id,
+        sender_id=None,
+        message_content=content,
+        message_type=MessageType.TEXT.name,
+    )
+    return send_to_chat_room(
+        BASE_USER_GROUP.format(user_id=message.sender_id), {"message": content},
+        ChatEvents.chatlist_on_read_receipt.value
+    )
+
+
+def send_to_chat_room(
+        group: str, message_data: dict, event_type: str
+):
+    logger.info(
+        f'{group=} {message_data=} {event_type=}'
+    )
+    return {
+        "type": "send_event",
+        "event_name": event_type,
+        "event_data": message_data,
+    }
 
 
 def create_access_token(*, user_id: int) -> Tuple[str, str]:

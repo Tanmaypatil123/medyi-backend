@@ -246,7 +246,7 @@ class Room(BaseAppModel):
 
 class Message(BaseAppModel):
     chat = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='messages')
-    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='messages_sent')
+    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='messages_sent',null=True)
     message_type = models.CharField(max_length=10, choices=[(tag.name, tag.value) for tag in MessageType],
                                     default=MessageType.VOICE.value, )
     content = models.TextField(default=None, null=True)
