@@ -1,5 +1,4 @@
 from .models import LLMServers
-import openai
 from .vllm import Vllm
 
 

@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.cache import cache
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-
+from api.Llmserver.llm_utils import *
 import logging
 
 from api.utils.constants import ChatEvents
@@ -42,7 +42,8 @@ def create_ai_model_for_user_and_assign(user_id: int, ai_character_id: int):
     room = get_or_create_group(user_id=user_id, ai_character_id=ai_character_id)
     print(f"[DEBUG] :: here.... {room.id} {ai_character_id=}")
     # generate ai model content
-    content = "somerhing"
+
+    content = "Hey, Hi"
     message = save_chat_message(
         room_id=room.id,
         sender_id=None,
