@@ -3,7 +3,7 @@ from django.shortcuts import render
 from api.authications.TokenGenerator import TokenGenerator
 from api.authications.api_authentication import MyAuthentication
 from api.services import login_or_register_user, get_data_and_create_user_chat_model, generate_access_token_service, \
-    get_discover_data, connect_ai_character_to_user
+    get_discover_data, connect_ai_character_to_user, get_chat_list_screen_data, get_chat_room_data
 from api.tasks import tryfun
 from api.utils.base_view import BaseAPIView
 from api.utils.response import status_200, handle_post_exception
@@ -74,3 +74,24 @@ class Tryapi(BaseAPIView):
     def post(self,request):
         tryfun.delay()
         return status_200(message="",data={})
+
+
+class GetChatListView(BaseAPIView):
+    authentication_classes = (MyAuthentication,)
+
+    def post(self,request):
+        user_id = request.user.id
+        data = get_chat_list_screen_data(user_id=user_id)
+        return status_200(message="", data=data)
+
+
+class GetRoomchats(BaseAPIView):
+    authentication_classes = (MyAuthentication,)
+
+    def post(self,request):
+        user_id = request.user.id
+        room_id = request.data.get("room_id",None)
+        if not room_id:
+            return status_200(message="", data={})
+        data = get_chat_room_data(user_id=user_id,room_id=room_id)
+        return status_200(message="", data=data)

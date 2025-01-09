@@ -43,3 +43,11 @@ def get_all_ai_characters():
 
 def get_or_create_user_ai_character(user_id:int,ai_character_ai:int):
     UserAiCharacter.objects.get_or_create(user_id=user_id,ai_character=ai_character_ai)
+
+
+def get_user_chat_room(*,user_id:int):
+    return Room.objects.filter(initiator_id=user_id,is_active=True)
+
+
+def get_chat_room_maessages(*,user_id:int,room_id:int):
+    return Message.objects.filter(room_id=room_id).order_by("id")

@@ -4,7 +4,8 @@ from api.authications.TokenGenerator import TokenGenerator
 from api.consumers.chat_consumer import BASE_USER_GROUP
 from api.models import RefreshTokenModel, MessageType, AICharacterType, UserAiCharacter
 from api.selectors import get_or_create_user, create_user_ai_character, create_refresh_token, get_or_create_group, \
-    save_chat_message, get_all_ai_characters, get_or_create_user_ai_character
+    save_chat_message, get_all_ai_characters, get_or_create_user_ai_character, get_user_chat_room, \
+    get_chat_room_maessages
 from django.conf import settings
 from django.core.cache import cache
 from channels.layers import get_channel_layer
@@ -155,3 +156,35 @@ def connect_ai_character_to_user(*,user_id:int,ai_character_ai:int):
         ai_character.save()
     return create_ai_model_for_user_and_assign(user_id=user_id, ai_character_id=ai_character.id)
 
+
+def get_chat_list_screen_data(*,user_id:int)->Dict:
+    chats_rooms = get_user_chat_room(user_id=user_id)
+    data = []
+    for room in chats_rooms:
+        data.append({
+            "room_id": room.id,
+            "name": room.initiatee.name,
+            "profile_url": room.initiatee.image_url,
+            "last_message_at": room.last_message_at,
+            "message": room.last_message.content
+        })
+
+
+def get_chat_room_data(*,user_id:int,room_id:int):
+    chat_room_messages = get_chat_room_maessages(user_id=user_id,room_id=room_id)
+    initiatee = chat_room_messages.first().room.initiatee
+    data = {"room_chat": [],"profile_data":{
+        "name": initiatee.name,
+        "profile_url": initiatee.image_url,
+        "is_online": True
+    }}
+    for room_chat in chat_room_messages:
+        data["room_chat"].append(
+            {
+                "message": room_chat.content,
+                "sender": room_chat.sender_id,
+                "created_at": room_chat.created_at
+
+            }
+        )
+    return data

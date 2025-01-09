@@ -221,6 +221,8 @@ class CustomUser(BaseAppModel):
 
 class UserAiCharacter(BaseAppModel):
     user = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE, related_name="user_ai")
+    image_url = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=20,null=True,default="")
     ai_character = models.ForeignKey(to="AiCharacters",on_delete=models.CASCADE,related_name="ai_character",null=True)
     properties = models.JSONField(default=dict)
 
@@ -264,7 +266,7 @@ class Room(BaseAppModel):
 
 
 class Message(BaseAppModel):
-    chat = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='messages')
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='messages_sent',null=True)
     message_type = models.CharField(max_length=10, choices=[(tag.name, tag.value) for tag in MessageType],
                                     default=MessageType.VOICE.value, )
