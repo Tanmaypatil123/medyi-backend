@@ -2,7 +2,7 @@ from datetime import timedelta
 from typing import Dict, Optional
 
 from api.authications.TokenGenerator import TokenGenerator
-from api.models import CustomUser, UserAiCharacter, Room, Message, RefreshTokenModel
+from api.models import CustomUser, UserAiCharacter, Room, Message, RefreshTokenModel, AiCharacters
 from api.utils import datetime
 
 
@@ -11,7 +11,6 @@ def get_or_create_user(*, email: str):
 
 
 def create_user_ai_character(*, user_id: int, data: Dict):
-    print(data)
     return UserAiCharacter.objects.create(user_id=user_id, properties=data)
 
 
@@ -36,3 +35,11 @@ def create_refresh_token(user_id: int):
     }
     refresh_token_model = RefreshTokenModel.objects.create(**refresh_data)
     return refresh_token_model.refresh_token
+
+
+def get_all_ai_characters():
+    return AiCharacters.objects.filter(is_active=True)
+
+
+def get_or_create_user_ai_character(user_id:int,ai_character_ai:int):
+    UserAiCharacter.objects.get_or_create(user_id=user_id,ai_character=ai_character_ai)
