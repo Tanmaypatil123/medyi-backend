@@ -221,8 +221,27 @@ class CustomUser(BaseAppModel):
 
 class UserAiCharacter(BaseAppModel):
     user = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE, related_name="user_ai")
+    ai_character = models.ForeignKey(to="AiCharacters",on_delete=models.CASCADE,related_name="ai_character",null=True)
     properties = models.JSONField(default=dict)
 
+
+class AICharacterType(Enum):
+    PUBLIC = "PUBLIC"
+    EXCLUSIVE = "EXCLUSIVE"
+
+
+class AiCharacters(BaseAppModel):
+    image_url = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=20)
+    bio = models.TextField(blank=True, null=True)
+    properties = models.JSONField(default=dict)
+    characterType = models.CharField(
+        max_length=20,
+        choices=[(tag.name, tag.value) for tag in AICharacterType],
+        default=None,
+        null=True
+    )
+    is_active = models.BooleanField(default=True,null=True)
 
 class MessageType(Enum):
     VOICE = 'VOICE'

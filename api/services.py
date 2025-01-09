@@ -2,9 +2,9 @@ from typing import Dict, Tuple, Optional
 
 from api.authications.TokenGenerator import TokenGenerator
 from api.consumers.chat_consumer import BASE_USER_GROUP
-from api.models import RefreshTokenModel, MessageType
+from api.models import RefreshTokenModel, MessageType, AICharacterType, UserAiCharacter
 from api.selectors import get_or_create_user, create_user_ai_character, create_refresh_token, get_or_create_group, \
-    save_chat_message
+    save_chat_message, get_all_ai_characters, get_or_create_user_ai_character
 from django.conf import settings
 from django.core.cache import cache
 from channels.layers import get_channel_layer
@@ -117,3 +117,40 @@ def get_cache_key_and_timeout(dict_identifier, **kwargs):
     else:
         cache_timeout = cache_dict["timeout"]
     return cache_key, cache_timeout
+
+
+def get_discover_data(*,user_id:int):
+    ai_characters = get_all_ai_characters()
+    data = {
+        "public": [],
+        "exclusive":[],
+    }
+    for ai_character in ai_characters:
+        if ai_characters.characterType == AICharacterType.EXCLUSIVE.name:
+            data["public"].append({
+                "id": ai_characters.id,
+                "name": ai_character.name,
+                "bio": ai_characters.bio,
+                "image_url": ai_characters.image_url,
+                "characterType": ai_characters.characterType,
+                "tags": ai_characters.properties("tags",[])
+            })
+            continue
+        data["exclusive"].append({
+            "id": ai_characters.id,
+            "name": ai_character.name,
+            "bio": ai_characters.bio,
+            "image_url": ai_characters.image_url,
+            "characterType": ai_characters.characterType,
+            "tags": ai_characters.properties("tags", [])
+        })
+    return data
+
+
+def connect_ai_character_to_user(*,user_id:int,ai_character_ai:int):
+    ai_character, created = get_or_create_user_ai_character(user_id=user_id,ai_character_ai=ai_character_ai)
+    if created:
+        ai_character.properties = ai_character.properties.get("ai_properties",None)
+        ai_character.save()
+    return create_ai_model_for_user_and_assign(user_id=user_id, ai_character_id=ai_character.id)
+
