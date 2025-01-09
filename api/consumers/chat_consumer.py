@@ -15,7 +15,7 @@ class AiChatConsumer(AsyncJsonWebsocketConsumer):
             await self.close()
             return
         await self.accept()
-        logger.info(f'[Connect] {self.scope=} {self.user_id}')
+        print(f'[Connect] {self.scope=} {self.user_id}')
         await self.channel_layer.group_add(BASE_USER_GROUP.format(user_id=self.user_id), self.channel_name)
 
     async def disconnect(self, close_code):

@@ -30,7 +30,7 @@ class TokenAuthMiddleware:
         return user_id
 
     async def __call__(self, scope, receive, send):
-        logger.info("inside auth")
+        print("inside auth")
         headers = dict(scope["headers"])
         scope["user"] = None
 

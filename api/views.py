@@ -4,6 +4,7 @@ from api.authications.TokenGenerator import TokenGenerator
 from api.authications.api_authentication import MyAuthentication
 from api.services import login_or_register_user, get_data_and_create_user_chat_model, generate_access_token_service, \
     get_discover_data, connect_ai_character_to_user
+from api.tasks import tryfun
 from api.utils.base_view import BaseAPIView
 from api.utils.response import status_200, handle_post_exception
 import logging
@@ -66,3 +67,10 @@ class ConnectToAiCharacter(BaseAPIView):
             return status_200(message="connect ai", data={})
         data = connect_ai_character_to_user(user_id=request.user.id,ai_character_ai=ai_character_ai)
         return status_200(message="connect ai",data=data)
+
+
+class Tryapi(BaseAPIView):
+
+    def post(self,request):
+        tryfun.delay()
+        return status_200(message="",data={})
