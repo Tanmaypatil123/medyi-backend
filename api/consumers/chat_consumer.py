@@ -2,6 +2,8 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 import logging
 
+from api.consumers.cusumer_utils import sample_reponse
+
 logger = logging.getLogger(__name__)
 
 BASE_USER_GROUP = f"AI_"
@@ -17,6 +19,7 @@ class AiChatConsumer(AsyncJsonWebsocketConsumer):
         await self.accept()
         print(f'[Connect] {self.scope=} {self.user_id}')
         await self.channel_layer.group_add(BASE_USER_GROUP.format(user_id=self.user_id), self.channel_name)
+        await self.send_json({"message":"user connected to socket"})
 
     async def disconnect(self, close_code):
 
@@ -35,6 +38,7 @@ class AiChatConsumer(AsyncJsonWebsocketConsumer):
 
     async def receive_json(self, event, **kwargs):
         event_type = event["type"]
+        print(event_type)
         events = await self.event_mapping()
         event_function = events[event_type]
         logger.info(
@@ -43,4 +47,10 @@ class AiChatConsumer(AsyncJsonWebsocketConsumer):
         await event_function(event["data"])
 
     async def send_message(self, data):
-        pass
+        print(data)
+    async def send_event(self, data):
+        logger.info(
+            f'{data=}'
+        )
+        await self.send_json(sample_reponse(data["event_name"], data=data["event_data"]))
+

@@ -28,7 +28,7 @@ DEBUG = env.bool("DJANGO_DEBUG", default=True)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-c*uf@#_jzeiwx^5$$(b2)14hk(u*n4pat)8i@+qqbd9bz87=zd"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 

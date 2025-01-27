@@ -19,7 +19,7 @@ class RegisterUser(BaseAPIView):
     @handle_post_exception
     def post(self, request):
         email = request.data.get("email", None)
-
+        print("here is coming...............")
         data = login_or_register_user(email=email)
         return status_200(message="Register user Data.", data={"data": data})
 
