@@ -3,9 +3,11 @@ from typing import Dict, Tuple, Optional
 from api.authications.TokenGenerator import TokenGenerator
 from api.consumers.chat_consumer import BASE_USER_GROUP
 from api.models import RefreshTokenModel, MessageType, AICharacterType, UserAiCharacter
-from api.selectors import get_or_create_user, create_user_ai_character, create_refresh_token, get_or_create_group, \
-    save_chat_message, get_all_ai_characters, get_or_create_user_ai_character, get_user_chat_room, \
+from api.selectors import (
+    get_or_create_user, create_user_ai_character, create_refresh_token, get_or_create_group,
+    save_chat_message, get_all_ai_characters, get_or_create_user_ai_character, get_user_chat_room,
     get_chat_room_maessages
+)
 from django.conf import settings
 from django.core.cache import cache
 from channels.layers import get_channel_layer
@@ -21,21 +23,17 @@ logger = logging.getLogger(__name__)
 def login_or_register_user(*, email: str) -> Dict:
     user, created = get_or_create_user(email=email)
     refresh_token = create_refresh_token(user_id=user.id)
-    access_token, access_expire = create_access_token(
-        user_id=user.id
-    )
-    data = {
+    access_token, access_expire = create_access_token(user_id=user.id)
+    return {
         "is_new_user": created,
         "access_token": access_token,
         "refresh_token": refresh_token
     }
-    return data
 
 
 def get_data_and_create_user_chat_model(*, data: Dict, user_id: int) -> Dict:
     ai_character = create_user_ai_character(user_id=user_id, data=data)
     print(f"======== {ai_character=}")
-    # Use delay() instead of apply_async for simpler calls
     return create_ai_model_for_user_and_assign(user_id=user_id, ai_character_id=ai_character.id)
 
 
@@ -63,12 +61,8 @@ def create_ai_model_for_user_and_assign(user_id: int, ai_character_id: int):
     )
 
 
-def send_to_chat_room(
-        group: str, message_data: dict, event_type: str
-):
-    logger.info(
-        f'{group=} {message_data=} {event_type=}'
-    )
+def send_to_chat_room(group: str, message_data: dict, event_type: str):
+    logger.info(f'{group=} {message_data=} {event_type=}')
     return {
         "type": "send_event",
         "event_name": event_type,
@@ -78,7 +72,6 @@ def send_to_chat_room(
 
 def create_access_token(*, user_id: int) -> Tuple[str, str]:
     access_token, _ = TokenGenerator.access_token()
-    # store auth_token in cache
     cache_key, cache_timeout = get_cache_key_and_timeout("OAUTH_TOKEN_CACHE", token=access_token)
     cache.set(cache_key, user_id, cache_timeout)
     return access_token, cache_timeout
@@ -87,110 +80,96 @@ def create_access_token(*, user_id: int) -> Tuple[str, str]:
 def generate_access_token_service(
         *, grant_type: TokenGenerator.GrantType.REFRESH_TOKEN, data: dict
 ) -> Optional[dict]:
-    access_token_data = {}
-    keys = data.keys()
-    if "refresh_token" in keys and data["refresh_token"]:
-        try:
-            refresh_token_model = RefreshTokenModel.objects.get(
-                refresh_token=data["refresh_token"]
-            )
-            if not refresh_token_model:
-                return None
+    if "refresh_token" not in data or not data["refresh_token"]:
+        return None
 
-            custom_user = refresh_token_model.user
-            user_id = custom_user.id
-            if custom_user.is_blocked or custom_user.is_deleted:
-                logger.info(
-                    "[AUTH 2] grant_type {} user id {} blocked".format(grant_type.name, user_id)
-                )
-                return None
-
-        except RefreshTokenModel.DoesNotExist:
+    try:
+        refresh_token_model = RefreshTokenModel.objects.get(refresh_token=data["refresh_token"])
+        if not refresh_token_model:
             return None
 
-        access_token, access_expire = create_access_token(
-            user_id=user_id,
-        )
-        access_token_data["access_token"] = access_token
-        access_token_data["expire_in"] = access_expire
-        return access_token_data
-    return None
+        custom_user = refresh_token_model.user
+        user_id = custom_user.id
+        if custom_user.is_blocked or custom_user.is_deleted:
+            logger.info(f"[AUTH 2] grant_type {grant_type.name} user id {user_id} blocked")
+            return None
+
+    except RefreshTokenModel.DoesNotExist:
+        return None
+
+    access_token, access_expire = create_access_token(user_id=user_id)
+    return {
+        "access_token": access_token,
+        "expire_in": access_expire
+    }
 
 
 def get_cache_key_and_timeout(dict_identifier, **kwargs):
     cache_dict = settings.CACHE_NAMES[dict_identifier]
     cache_key = cache_dict["key"].format(**kwargs)
-    if callable(cache_dict["timeout"]):
-        cache_timeout = cache_dict["timeout"]()
-    else:
-        cache_timeout = cache_dict["timeout"]
+    cache_timeout = cache_dict["timeout"]() if callable(cache_dict["timeout"]) else cache_dict["timeout"]
     return cache_key, cache_timeout
 
 
-def get_discover_data(*,user_id:int):
+def get_discover_data(*, user_id: int) -> Dict:
     ai_characters = get_all_ai_characters()
     data = {
         "public": [],
-        "exclusive":[],
+        "exclusive": [],
     }
     for ai_character in ai_characters:
-        if ai_characters.characterType == AICharacterType.EXCLUSIVE.name:
-            data["public"].append({
-                "id": ai_characters.id,
-                "name": ai_character.name,
-                "bio": ai_characters.bio,
-                "image_url": ai_characters.image_url,
-                "characterType": ai_characters.characterType,
-                "tags": ai_characters.properties("tags",[])
-            })
-            continue
-        data["exclusive"].append({
-            "id": ai_characters.id,
+        character_data = {
+            "id": ai_character.id,
             "name": ai_character.name,
-            "bio": ai_characters.bio,
-            "image_url": ai_characters.image_url,
-            "characterType": ai_characters.characterType,
-            "tags": ai_characters.properties("tags", [])
-        })
+            "bio": ai_character.bio,
+            "image_url": ai_character.image_url,
+            "characterType": ai_character.characterType,
+            "tags": ai_character.properties("tags", [])
+        }
+        if ai_character.characterType == AICharacterType.EXCLUSIVE.name:
+            data["exclusive"].append(character_data)
+        else:
+            data["public"].append(character_data)
     return data
 
 
-def connect_ai_character_to_user(*,user_id:int,ai_character_ai:int):
-    ai_character, created = get_or_create_user_ai_character(user_id=user_id,ai_character_ai=ai_character_ai)
+def connect_ai_character_to_user(*, user_id: int, ai_character_ai: int):
+    ai_character, created = get_or_create_user_ai_character(user_id=user_id, ai_character_ai=ai_character_ai)
     if created:
-        ai_character.properties = ai_character.properties.get("ai_properties",None)
+        ai_character.properties = ai_character.properties.get("ai_properties", None)
         ai_character.save()
     return create_ai_model_for_user_and_assign(user_id=user_id, ai_character_id=ai_character.id)
 
 
-def get_chat_list_screen_data(*,user_id:int)->Dict:
-    chats_rooms = get_user_chat_room(user_id=user_id)
-    data = []
-    for room in chats_rooms:
-        data.append({
+def get_chat_list_screen_data(*, user_id: int) -> Dict:
+    chat_rooms = get_user_chat_room(user_id=user_id)
+    return [
+        {
             "room_id": room.id,
             "name": room.initiatee.name,
             "profile_url": room.initiatee.image_url,
             "last_message_at": room.last_message_at,
             "message": room.last_message.content
-        })
+        }
+        for room in chat_rooms
+    ]
 
 
-def get_chat_room_data(*,user_id:int,room_id:int):
-    chat_room_messages = get_chat_room_maessages(user_id=user_id,room_id=room_id)
+def get_chat_room_data(*, user_id: int, room_id: int) -> Dict:
+    chat_room_messages = get_chat_room_maessages(user_id=user_id, room_id=room_id)
     initiatee = chat_room_messages.first().room.initiatee
-    data = {"room_chat": [],"profile_data":{
-        "name": initiatee.name,
-        "profile_url": initiatee.image_url,
-        "is_online": True
-    }}
-    for room_chat in chat_room_messages:
-        data["room_chat"].append(
+    return {
+        "room_chat": [
             {
                 "message": room_chat.content,
                 "sender": room_chat.sender_id,
                 "created_at": room_chat.created_at
-
             }
-        )
-    return data
+            for room_chat in chat_room_messages
+        ],
+        "profile_data": {
+            "name": initiatee.name,
+            "profile_url": initiatee.image_url,
+            "is_online": True
+        }
+    }
