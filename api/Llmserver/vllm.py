@@ -29,7 +29,7 @@ class Vllm:
     
     def get_chat_response(self, messages,**kwargs):
         response = requests.post(
-            f"{self.server_url}/chat/completions",
+            f"{self.server_url}/v1/chat/completions",
             headers={
                 "Content-Type": "application/json",
             },
@@ -39,7 +39,7 @@ class Vllm:
                 **kwargs
             }
         )
-
+        print("response is here",response.json())
         return response.json()["choices"][0]["message"]["content"]
 
 

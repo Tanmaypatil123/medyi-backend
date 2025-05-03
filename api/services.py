@@ -44,15 +44,21 @@ def create_ai_model_for_user_and_assign(user_id: int, ai_character_id: int):
     print(f"[DEBUG] :: here.... {room.id} {ai_character_id=}")
     # generate ai model content
 
-    content = "Hey, Hi"
+    # content = "Hey, Hi"
+    system_prompt = get_system_prompt("hello")
+    output = get_chat_response(
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": "Hello, how are you?"},
+        ])
     message = save_chat_message(
         room_id=room.id,
         sender_id=None,
-        message_content=content,
+        message_content=output,
         message_type=MessageType.TEXT.name,
     )
     return send_to_chat_room(
-        BASE_USER_GROUP.format(user_id=message.sender_id), {"message": content},
+        BASE_USER_GROUP.format(user_id=message.sender_id), {"message": output},
         ChatEvents.chatlist_on_read_receipt.value
     )
 

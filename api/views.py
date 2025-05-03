@@ -6,6 +6,7 @@ from api.services import login_or_register_user, get_data_and_create_user_chat_m
     get_discover_data, connect_ai_character_to_user, get_chat_list_screen_data, get_chat_room_data
 from api.tasks import tryfun
 from api.utils.base_view import BaseAPIView
+from api.Llmserver.llm_utils import get_chat_response, get_system_prompt
 from api.utils.response import status_200, handle_post_exception
 import logging
 
@@ -72,8 +73,21 @@ class ConnectToAiCharacter(BaseAPIView):
 class Tryapi(BaseAPIView):
 
     def post(self,request):
-        tryfun.delay()
-        return status_200(message="",data={})
+        # ai_character_ai = request.data.get("ai_character_ai",None)
+        # if not ai_character_ai:
+        #     return status_200(message="connect ai", data={})
+        # data = connect_ai_character_to_user(user_id=1,ai_character_ai=ai_character_ai)
+        # return status_200(message="connect ai",data=data)
+        system_prompt = get_system_prompt("hello")
+        output = get_chat_response(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": "Hello, how are you?"},
+            ])
+        
+        print("output is here",output)
+        return status_200(message="connect ai",data=output)
+
 
 
 class GetChatListView(BaseAPIView):
