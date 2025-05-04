@@ -194,7 +194,7 @@ def get_chat_list_screen_data(*, user_id: int) -> Dict:
             "name": room.initiatee.name,
             "profile_url": room.initiatee.image_url,
             "last_message_at": room.last_message_at,
-            "message": room.last_message.content if room.last_message else ""
+            "message": room.message.content if room.message else ""
         }
         for room in chat_rooms
     ]

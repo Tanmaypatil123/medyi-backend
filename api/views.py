@@ -27,7 +27,7 @@ class RegisterUser(BaseAPIView):
 
 
 class GetDataAndCreateUserChatModel(BaseAPIView):
-    # authentication_classes = (MyAuthentication,)
+    authentication_classes = (MyAuthentication,)
 
     @handle_post_exception
     def post(self, request):
