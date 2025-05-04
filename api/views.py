@@ -31,7 +31,7 @@ class GetDataAndCreateUserChatModel(BaseAPIView):
 
     @handle_post_exception
     def post(self, request):
-        user_id = CustomUser.objects.get(id=1).id #request.user.id
+        user_id = request.user.id
         data = get_data_and_create_user_chat_model(user_id=user_id,data=request.data)
         return status_200(message="Created Chat Model", data=data)
 

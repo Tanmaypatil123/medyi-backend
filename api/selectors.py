@@ -10,8 +10,8 @@ def get_or_create_user(*, email: str):
     return CustomUser.objects.get_or_create(email=email, is_deleted=False)
 
 
-def create_user_ai_character(*, user_id: int, data: Dict):
-    return UserAiCharacter.objects.create(user_id=user_id, properties=data)
+def create_user_ai_character(*, user_id: int, data: Dict,ai_bot_image: str,ai_bot_name: str):
+    return UserAiCharacter.objects.create(user_id=user_id, properties=data,image_url=ai_bot_image,name=ai_bot_name)
 
 
 def get_or_create_group(*, user_id, ai_character_id: int):

@@ -33,8 +33,9 @@ def login_or_register_user(*, email: str) -> Dict:
 
 
 def get_data_and_create_user_chat_model(*, data: Dict, user_id: int) -> Dict:
-    data["image_url"] = random.choice(FEMAL_AI_BOT_URL)
-    ai_character = create_user_ai_character(user_id=user_id, data=data)
+    ai_bot_image = random.choice(FEMAL_AI_BOT_URL)
+    ai_bot_name = data.get("name","")
+    ai_character = create_user_ai_character(user_id=user_id, data=data,ai_bot_image=ai_bot_image,ai_bot_name=ai_bot_name)
     print(f"======== {ai_character=}")
     return create_ai_model_for_user_and_assign(user_id=user_id, ai_character_id=ai_character.id)
 
