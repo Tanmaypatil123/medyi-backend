@@ -57,13 +57,54 @@ def create_ai_model_for_user_and_assign(user_id: int, ai_character_id: int):
         message_content=output,
         message_type=MessageType.TEXT.name,
     )
-    return send_to_chat_room(
+    return api_send_to_chat_room(
         BASE_USER_GROUP.format(user_id=message.sender_id), {"message": output},
         ChatEvents.chatlist_on_read_receipt.value
     )
 
 
+def send_and_save_message_in_chat(*,user_id: int, ai_character_id: int, message_content: str):
+    room = get_or_create_group(user_id=user_id, ai_character_id=ai_character_id)
+    print(f"[DEBUG] :: here.... {room.id} {ai_character_id=}")
+    system_prompt = get_system_prompt("hello")
+    # todo: samadhan here need to ask @tanmay how to handle
+    output = get_chat_response(
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": "Hello, how are you?"},
+        ])
+    user_message = save_chat_message(
+        room_id=room.id,
+        sender_id=user_id,
+        message_content=message_content,
+        message_type=MessageType.TEXT.name,
+    )
+    ai_bot_chat = save_chat_message(
+        room_id=room.id,
+        sender_id=None,
+        message_content=output,
+        message_type=MessageType.TEXT.name,
+    )
+    return send_to_chat_room(
+        BASE_USER_GROUP.format(user_id=user_id), {"message": output},
+        ChatEvents.chatlist_on_read_receipt.value
+    )
+
+
 def send_to_chat_room(group: str, message_data: dict, event_type: str):
+    logger.info(f'{group=} {message_data=} {event_type=}')
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        group,
+        {
+            "type": "send_event",
+            "event_name": event_type,
+            "event_data": message_data,
+        },
+    )
+
+
+def api_send_to_chat_room(group: str, message_data: dict, event_type: str):
     logger.info(f'{group=} {message_data=} {event_type=}')
     return {
         "type": "send_event",
