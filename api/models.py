@@ -240,7 +240,7 @@ class AiCharacters(BaseAppModel):
     characterType = models.CharField(
         max_length=20,
         choices=[(tag.name, tag.value) for tag in AICharacterType],
-        default=None,
+        default=AICharacterType.PUBLIC.name,
         null=True
     )
     is_active = models.BooleanField(default=True,null=True)

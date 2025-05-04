@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 from api.authications.TokenGenerator import TokenGenerator
 from api.authications.api_authentication import MyAuthentication
+from api.models import CustomUser
 from api.services import login_or_register_user, get_data_and_create_user_chat_model, generate_access_token_service, \
     get_discover_data, connect_ai_character_to_user, get_chat_list_screen_data, get_chat_room_data
 from api.tasks import tryfun
@@ -26,11 +27,11 @@ class RegisterUser(BaseAPIView):
 
 
 class GetDataAndCreateUserChatModel(BaseAPIView):
-    authentication_classes = (MyAuthentication,)
+    # authentication_classes = (MyAuthentication,)
 
     @handle_post_exception
     def post(self, request):
-        user_id = request.user.id
+        user_id = CustomUser.objects.get(id=1).id #request.user.id
         data = get_data_and_create_user_chat_model(user_id=user_id,data=request.data)
         return status_200(message="Created Chat Model", data=data)
 

@@ -20,7 +20,7 @@ def get_or_create_group(*, user_id, ai_character_id: int):
 
 def save_chat_message(room_id: int, sender_id: Optional[int], message_type: str, message_content: str, ):
     return Message.objects.create(
-        chat_id=room_id,
+        room_id=room_id,
         sender_id=sender_id,
         message_type=message_type,
         content=message_content, )
