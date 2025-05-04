@@ -1,3 +1,4 @@
+import random
 from typing import Dict, Tuple, Optional
 
 from api.authications.TokenGenerator import TokenGenerator
@@ -15,7 +16,7 @@ from asgiref.sync import async_to_sync
 from api.Llmserver.llm_utils import *
 import logging
 
-from api.utils.constants import ChatEvents
+from api.utils.constants import ChatEvents, FEMAL_AI_BOT_URL
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ def login_or_register_user(*, email: str) -> Dict:
 
 
 def get_data_and_create_user_chat_model(*, data: Dict, user_id: int) -> Dict:
+    data["image_url"] = random.choice(FEMAL_AI_BOT_URL)
     ai_character = create_user_ai_character(user_id=user_id, data=data)
     print(f"======== {ai_character=}")
     return create_ai_model_for_user_and_assign(user_id=user_id, ai_character_id=ai_character.id)
