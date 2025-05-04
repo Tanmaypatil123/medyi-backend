@@ -18,7 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from api.views import RegisterUser, GetDataAndCreateUserChatModel, GetAccessTokenApi, GetDiscoversData, \
-    ConnectToAiCharacter, Tryapi
+    ConnectToAiCharacter, Tryapi, GetChatListView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -27,6 +27,7 @@ urlpatterns = [
     path("getAccessTokenApi",GetAccessTokenApi.as_view()),
     path("getDiscoversData",GetDiscoversData.as_view()),
     path("connect-to-aichat",ConnectToAiCharacter.as_view()),
+    path("getChatListView",GetChatListView.as_view()),
     path("tryapi",Tryapi.as_view()),
 
 ]
