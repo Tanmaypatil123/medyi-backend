@@ -1,9 +1,9 @@
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 import logging
 
 from api.consumers.cusumer_utils import sample_reponse
-from api.services import send_and_save_message_in_chat
 
 logger = logging.getLogger(__name__)
 
@@ -48,13 +48,16 @@ class AiChatConsumer(AsyncJsonWebsocketConsumer):
         await event_function(event["data"])
 
     async def send_message(self, data):
+        from api.services import send_and_save_message_in_chat
+
         ai_character_id = data.get("ai_bot_id",None)
+        ai_character_id = 1
         message = data.get("message","")
         if not ai_character_id:
             await self.send_json(sample_reponse(data["event_name"], data={"message": "invalid ai"}))
             return
-
-        await send_and_save_message_in_chat(user_id=self.user_id,ai_character_id=ai_character_id,message_content=message)
+        self.user_id = 1
+        await database_sync_to_async(send_and_save_message_in_chat)(user_id=self.user_id,ai_character_id=ai_character_id,message_content=message)
 
     async def send_event(self, data):
         logger.info(

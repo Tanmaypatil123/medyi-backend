@@ -59,11 +59,12 @@ def create_ai_model_for_user_and_assign(user_id: int, ai_character_id: int):
     )
     return api_send_to_chat_room(
         BASE_USER_GROUP.format(user_id=message.sender_id), {"message": output},
-        ChatEvents.chatlist_on_read_receipt.value
+        ChatEvents.received_message.value
     )
 
 
 def send_and_save_message_in_chat(*,user_id: int, ai_character_id: int, message_content: str):
+    print(f"[DEBUG] ::  here is coming .. {user_id=}, {ai_character_id=}")
     room = get_or_create_group(user_id=user_id, ai_character_id=ai_character_id)
     print(f"[DEBUG] :: here.... {room.id} {ai_character_id=}")
     system_prompt = get_system_prompt("hello")
@@ -87,7 +88,7 @@ def send_and_save_message_in_chat(*,user_id: int, ai_character_id: int, message_
     )
     return send_to_chat_room(
         BASE_USER_GROUP.format(user_id=user_id), {"message": output},
-        ChatEvents.chatlist_on_read_receipt.value
+        ChatEvents.received_message.value
     )
 
 

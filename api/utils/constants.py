@@ -26,17 +26,8 @@ IMAGE_QUALITY_WEIGHTS = {
 
 
 class ChatEvents(Enum):
-    send_message_error = "send_message_error"
-    on_read_receipt = "on_read_receipt"
-    send_read_receipt = "send_read_receipt"
-    new_message = "new_message"
-    new_room = "new_room"
-    updated_profile = 'updated_profile'
-    profile_update_failed = "profile_update_failed"
-    askout_received = "askout_received"
-    update_chatlist = "update_chatlist"
-    chatlist_on_read_receipt = "chatlist_on_read_receipt"
-    updated_profile_images = "updated_profile_images"
+    received_message = "received_message"
+
 
 
 FEMAL_AI_BOT_URL = [
