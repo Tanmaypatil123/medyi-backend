@@ -259,8 +259,8 @@ class MessageReadReciept(Enum):
 class Room(BaseAppModel):
     initiator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='chat_initiator')
     initiatee = models.ForeignKey(UserAiCharacter, on_delete=models.CASCADE, related_name='chat_initiatee')
-    last_message_at = models.DateTimeField(null=True)
-    last_message = models.ForeignKey("Message", on_delete=models.CASCADE, null=True, related_name='messages')
+    last_message_at = models.DateTimeField(auto_now_add=True, editable=True)
+    message = models.ForeignKey("Message", on_delete=models.CASCADE, null=True, related_name='messages')
     is_active = models.BooleanField(default=True, null=True)
     properties = models.JSONField(default=dict, null=True)
 
