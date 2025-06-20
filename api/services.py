@@ -1,4 +1,6 @@
 import random
+import re
+import uuid
 from typing import Dict, Tuple, Optional
 
 from api.authications.TokenGenerator import TokenGenerator
@@ -7,7 +9,7 @@ from api.models import RefreshTokenModel, MessageType, AICharacterType, UserAiCh
 from api.selectors import (
     get_or_create_user, create_user_ai_character, create_refresh_token, get_or_create_group,
     save_chat_message, get_all_ai_characters, get_or_create_user_ai_character, get_user_chat_room,
-    get_chat_room_maessages
+    get_chat_room_maessages, get_or_create_custom_user
 )
 from django.conf import settings
 from django.core.cache import cache
@@ -17,9 +19,70 @@ from api.Llmserver.llm_utils import *
 import logging
 
 from api.utils.constants import ChatEvents, FEMAL_AI_BOT_URL
+from api.utils.response import ServiceException, ExceptionType
+from api.utils.sms_helper import sms_helper
 
 logger = logging.getLogger(__name__)
 
+
+def is_valid_mobile_no(*, mobile_no: str) -> bool:
+    if mobile_no is None:
+        return False
+    pattern = re.compile("^[0-9]{10}$")
+    return bool(pattern.match(mobile_no))
+
+
+def map_mobile_num_and_verification_id(*, data: Dict):
+    mobile_num = data["mobile_no"]
+    verification_id = data["verification_id"]
+    cache_key, ttl = get_cache_key_and_timeout(
+        "OTP_VERIFICATION_CACHE", mobile_no=mobile_num
+    )
+    cache.set(cache_key, verification_id, ttl)
+
+
+def verify_and_return_verification_id(*, mobile_number: str) -> Optional[str]:
+    if not mobile_number:
+        raise ServiceException("Invalid Otp")
+    cache_key, _ = get_cache_key_and_timeout(
+        "OTP_VERIFICATION_CACHE", mobile_no=mobile_number
+    )
+    value = cache.get(cache_key)
+    if not value:
+        raise ServiceException("Invalid Otp")
+    return value
+
+
+def verify_login_otp_service(*, otp: str, verification_id: str, mobile_no) -> Dict:
+    logger.info(
+        f"[OTP] verify otp mobile no {mobile_no} otp {otp} {verification_id} request initiated"
+    )
+    if not verification_id:
+        raise ServiceException("Invalid OTP", type=ExceptionType.SILENT)
+    result = sms_helper.verify_login_otp(
+        otp=otp, verification_id=verification_id, mobile_no=mobile_no
+    )
+    logger.info(
+        f"[OTP] verify otp mobile no {mobile_no} otp {otp} {verification_id} request completed"
+    )
+    user, created = get_or_create_custom_user(mobile_no=mobile_no)
+
+    access_token, access_expire = create_access_token(user_id=user.id)
+    refresh_token = create_refresh_token(user_id=user.id)
+    result["access_token"] = access_token
+    result["refresh_token"] = refresh_token
+
+    return result
+
+def send_login_otp_service(*, mobile_no: str):
+    if (
+            mobile_no == "9876543210"
+            or mobile_no == "9876543211"
+    ):
+        return dict(verification_id="DEBUG_" + str(uuid.uuid4()), mobile_no=mobile_no)
+    result = sms_helper.send_login_otp(mobile_no=mobile_no)
+
+    return result
 
 def login_or_register_user(*, email: str) -> Dict:
     user, created = get_or_create_user(email=email)

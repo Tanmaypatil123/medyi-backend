@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 from api.authications.TokenGenerator import TokenGenerator
 from api.models import CustomUser, UserAiCharacter, Room, Message, RefreshTokenModel, AiCharacters
@@ -51,3 +51,12 @@ def get_user_chat_room(*,user_id:int):
 
 def get_chat_room_maessages(*,user_id:int,room_id:int):
     return Message.objects.filter(room_id=room_id).order_by("id")
+
+
+def get_or_create_custom_user(*, mobile_no: Optional[str] = None, user_id: Optional[int] = None) -> Tuple[
+    CustomUser, bool]:
+    if user_id:
+        user = CustomUser.objects.filter(id=user_id, is_deleted=False).first()
+    else:
+        user = CustomUser.objects.filter(mobile_no=mobile_no, is_deleted=False).first()
+    return (user, False) if user else (CustomUser.objects.create(mobile_no=mobile_no), True)

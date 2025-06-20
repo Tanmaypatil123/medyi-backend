@@ -17,12 +17,13 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-from api.views import RegisterUser, GetDataAndCreateUserChatModel, GetAccessTokenApi, GetDiscoversData, \
-    ConnectToAiCharacter, Tryapi, GetChatListView, GetRoomchats
+from api.views import GetDataAndCreateUserChatModel, GetAccessTokenApi, GetDiscoversData, \
+    ConnectToAiCharacter, Tryapi, GetChatListView, GetRoomchats, SendOtp, VerifyOtp
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("registerUser",RegisterUser.as_view()),
+    path("sendOtp/",SendOtp.as_view()),
+    path("verifyOtp/",VerifyOtp.as_view()),
     path("getDataAndCreateUserChatModel",GetDataAndCreateUserChatModel.as_view()),
     path("getAccessTokenApi",GetAccessTokenApi.as_view()),
     path("getDiscoversData",GetDiscoversData.as_view()),

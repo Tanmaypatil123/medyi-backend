@@ -4,11 +4,12 @@ from api.authications.TokenGenerator import TokenGenerator
 from api.authications.api_authentication import MyAuthentication
 from api.models import CustomUser
 from api.services import login_or_register_user, get_data_and_create_user_chat_model, generate_access_token_service, \
-    get_discover_data, connect_ai_character_to_user, get_chat_list_screen_data, get_chat_room_data
-from api.tasks import tryfun
+    get_discover_data, connect_ai_character_to_user, get_chat_list_screen_data, get_chat_room_data, is_valid_mobile_no, \
+    send_login_otp_service, map_mobile_num_and_verification_id, verify_and_return_verification_id, \
+    verify_login_otp_service
 from api.utils.base_view import BaseAPIView
 from api.Llmserver.llm_utils import get_chat_response, get_system_prompt
-from api.utils.response import status_200, handle_post_exception
+from api.utils.response import status_200, handle_post_exception, ServiceException
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,14 +17,34 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 
-class RegisterUser(BaseAPIView):
-
+class SendOtp(BaseAPIView):
     @handle_post_exception
     def post(self, request):
-        email = request.data.get("email", None)
-        print("here is coming...............")
-        data = login_or_register_user(email=email)
-        return status_200(message="Register user Data.", data={"data": data})
+        mobile_no = request.data.get("mobile_no")
+        is_mobile_num_valid = is_valid_mobile_no(mobile_no=mobile_no)
+        if not is_mobile_num_valid:
+            raise ServiceException("Mobile Number Invalid")
+        data = send_login_otp_service(
+            mobile_no=mobile_no,
+        )
+        logger.info("mobile_no {} OTP send data {}".format(mobile_no, data))
+        map_mobile_num_and_verification_id(data=data)
+
+        return status_200("Done!", data={"mobile_no": data["mobile_no"]})
+
+
+class VerifyOtp(BaseAPIView):
+    @handle_post_exception
+    def post(self, request):
+        otp = request.data.get("otp")
+        mobile_no = request.data.get("mobile_no")
+
+        verification_id = verify_and_return_verification_id(mobile_number=mobile_no)
+
+        data = verify_login_otp_service(
+            otp=otp, verification_id=verification_id, mobile_no=mobile_no
+        )
+        return status_200("successfully verified", data=data)
 
 
 class GetDataAndCreateUserChatModel(BaseAPIView):

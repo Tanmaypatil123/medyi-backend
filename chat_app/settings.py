@@ -147,3 +147,28 @@ CACHE_NAMES = {
         "timeout": 2 * 24 * 60 * 60,
     },
 }
+
+
+TWO_FACTOR_SMS_SERVICE_CONFIG = {
+    "API_KEY": env("TWO_FACTOR_API_KEY", default="44751514-8045-11e9-ade6-0200cd936042"),
+    "BASE_URL": env("TWO_FACTOR_BASE_URL", default="http://2factor.in/API/V1"),
+    "TRANSACTION_SMS_SUFFIX": env(
+        "TWO_FACTOR_TRANSACTION_SMS_SUFFIX", default="/ADDON_SERVICES/SEND/TSMS"
+    ),
+    "LOGIN_OTP_SMS_SUFFIX": env(
+        "TWO_FACTOR_LOGIN_OTP_SMS_SUFFIX", default="TWO_FACTOR_LOGIN_OTP_SMS_SUFFIX"
+    ),
+    "VERIFY_LOGIN_OTP_SUFFIX": env(
+        "TWO_FACTOR_VERIFY_LOGIN_OTP_SUFFIX", default="/{0}/SMS/VERIFY/{1}/{2}"
+    ),
+    "templates": {
+        "com_exec": {
+            "from": env("TWO_FACTOR_TEMPLATE_COM_EXEC_FROM_NAME", default=""),
+            "template_name": env("TWO_FACTOR_TEMPLATE_COM_EXEC_TEMPLATE_NAME", default=""),
+        },
+        "login_otp": {
+            "from": env("TWO_FACTOR_TEMPLATE_LOGIN_OTP_FROM_NAME", default=""),
+            "template_name": env("TWO_FACTOR_TEMPLATE_LOGIN_OTP_TEMPLATE_NAME", default=""),
+        },
+    },
+}
